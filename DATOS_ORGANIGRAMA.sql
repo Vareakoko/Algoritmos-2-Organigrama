@@ -1,0 +1,114 @@
+CREATE TABLE Organigramas(
+    COD_ORG CHAR(5) PRIMARY KEY,
+    ORG VARCHAR(20) NOT NULL,
+    FEC DATE NOT NULL
+);
+
+CREATE TABLE Usuarios(
+    ID CHAR(36) PRIMARY KEY,
+    NOM VARCHAR(20) UNIQUE NOT NULL,
+    PASS VARCHAR(50) NOT NULL 
+);
+
+CREATE TABLE Dependencias(
+    COD_DEP CHAR(4) PRIMARY KEY,
+    NOM VARCHAR(25),
+    CODRES CHAR(5),
+    COD_ORG CHAR(3),
+    CONSTRAINT fk_organigrama_dependencias
+      FOREIGN KEY(COD_ORG) 
+	  REFERENCES Organigramas(COD_ORG)
+	  ON DELETE CASCADE
+);
+
+CREATE TABLE Personas(
+    COD_PER CHAR(5) PRIMARY KEY,
+    NOM VARCHAR(20) NOT NULL,
+    APE VARCHAR(15),
+    TEL VARCHAR(12),
+    DIR VARCHAR(50),
+    DEP CHAR(4) NOT NULL,
+    SAL NUMERIC(9), 
+
+    CONSTRAINT fk_dependencias_personas
+      FOREIGN KEY(DEP) 
+	  REFERENCES Dependencias(COD_DEP)
+	  ON DELETE CASCADE
+);
+
+CREATE TABLE UsrOrg(
+    USR_ID CHAR(36) NOT NULL,
+    COD_ORG CHAR(3) NOT NULL UNIQUE,
+    CONSTRAINT fk_usuario_usr_org
+    FOREIGN KEY(USR_ID) 
+	  REFERENCES Usuarios(ID)
+	  ON DELETE CASCADE,
+
+    CONSTRAINT fk_organigrama_usr_org
+      FOREIGN KEY(COD_ORG) 
+	  REFERENCES Organigramas(COD_ORG)
+	  ON DELETE CASCADE  
+);
+
+ALTER TABLE Dependencias ADD COLUMN pos_x INT NOT NULL;
+ALTER TABLE Dependencias ADD COLUMN pos_y INT NOT NULL;
+
+CREATE TABLE OrgDep(
+    COD_ORG VARCHAR(3) UNIQUE NOT NULL,
+    DEP_MAYOR VARCHAR(4) UNIQUE NOT NULL,
+    CONSTRAINT fk_orgdep_codorg
+    FOREIGN KEY(COD_ORG) 
+	  REFERENCES Organigramas(COD_ORG)
+	  ON DELETE CASCADE,
+
+    CONSTRAINT fk_orgdep_dep_mayor
+      FOREIGN KEY(DEP_MAYOR) 
+	  REFERENCES Dependencias(COD_DEP)
+	  ON DELETE CASCADE
+
+);
+
+CREATE TABLE DepDep(
+    DEP_ANT CHAR(4) NOT NULL, --dependencia antecesora
+    DEP_SUC CHAR(4) UNIQUE NOT NULL, --dependencia sucesora
+    CONSTRAINT fk_dependencia_ant
+      FOREIGN KEY(DEP_ANT) 
+	  REFERENCES Dependencias(COD_DEP)
+	  ON DELETE CASCADE,
+
+    CONSTRAINT fk_dependencia_suc
+      FOREIGN KEY(DEP_SUC) 
+	  REFERENCES Dependencias(COD_DEP)
+	  ON DELETE CASCADE
+
+);
+
+
+CREATE TABLE Personas(
+    COD_PER CHAR(5) PRIMARY KEY,
+    NOM VARCHAR(20) NOT NULL,
+    APE VARCHAR(15),
+    TEL VARCHAR(12),
+    DIR VARCHAR(50),
+    DEP CHAR(4) NOT NULL,
+    SAL NUMERIC(9), 
+
+    CONSTRAINT fk_dependencias_personas
+      FOREIGN KEY(DEP) 
+	  REFERENCES Dependencias(COD_DEP)
+	  ON DELETE CASCADE
+);
+
+ALTER TABLE Dependencias 
+ADD CONSTRAINT fk_dependencia_responsable 
+FOREIGN KEY (CODRES) 
+REFERENCES Personas (COD_PER);
+
+SELECT COD_ORG
+FROM Organigramas;
+
+SELECT ORG
+FROM Organigramas;
+
+ALTER TABLE Organigramas
+ALTER COLUMN COD_ORG TYPE CHAR(5);
